@@ -41,12 +41,14 @@ resource "aws_route_table_association" "aws_route_table_association" {
 
   ingress = [
     {
+      description = "allow port 22"
       cidr_blocks = ["0.0.0.0/0"]
       from_port   = 22
       to_port     = 22
       protocol    = "tcp"
     },
     {
+      description = "allow port 80"
       cidr_blocks = ["0.0.0.0/0"]
       from_port   = 80
       to_port     = 80
@@ -55,6 +57,7 @@ resource "aws_route_table_association" "aws_route_table_association" {
   ]
 
   egress = [{
+    description = "allow all trafic"
     from_port        = 0
     to_port          = 0
     protocol         = "-1"
