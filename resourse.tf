@@ -34,34 +34,32 @@ resource "aws_route_table_association" "aws_route_table_association" {
   subnet_id      = aws_subnet.publicsubnet.id
   route_table_id = aws_route_table.routetable.id
 }
- resource "aws_security_group" "testvpc_aws_security_group" {
-  name        = "allow_tls"
+# new resourse for security group creation 
+resource "aws_security_group" "testvpc_securitygroup" {
+  name        = "testvpc_securitygroup"
   description = "Allow TLS inbound traffic and all outbound traffic"
   vpc_id      = aws_vpc.testvpc.id
 
-  ingress = [
-    {
-      description = "allow port 22"
-      cidr_blocks = ["0.0.0.0/0"]
-      from_port   = 22
-      to_port     = 22
-      protocol    = "tcp"
-    },
-    {
-      description = "allow port 80"
-      cidr_blocks = ["0.0.0.0/0"]
-      from_port   = 80
-      to_port     = 80
-      protocol    = "tcp"
-    }
-  ]
-
-  egress = [{
-    description = "allow all trafic"
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }]
+  tags = {
+    Name = "testvpc_securitygroup"
+  }
+}
+resource "aws_vpc_security_group_ingress_rule" "allow_tls_ipv4" {
+  security_group_id = aws_security_group.testvpc_securitygroup.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 22
+  ip_protocol       = "tcp"
+  to_port           = 22
+}
+resource "aws_vpc_security_group_ingress_rule" "allow_tls_ipv4" {
+  security_group_id = aws_security_group.testvpc_securitygroup.id
+  cidr_ipv4         = "0.0.0.0/0"
+  from_port         = 80
+  ip_protocol       = "tcp"
+  to_port           = 80
+}
+resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
+  security_group_id = aws_security_group.testvpc_securitygroup.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "-1" # semantically equivalent to all ports
 }
