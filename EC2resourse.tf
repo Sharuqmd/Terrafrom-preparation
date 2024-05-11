@@ -1,10 +1,10 @@
 resource "aws_instance" "testec2" {
-  ami = "ami-05e00961530ae1b55"
-  instance_type = "t2.micro"
-  key_name = terraformkey.pem
-  subnet_id = aws_subnet.publicsubnet.id
-  vpc_security_group_ids = aws_security_group.testvpc_aws_security_group.id
-  user_data = <<-EOF
+  ami                    = "ami-05e00961530ae1b55"
+  instance_type          = "t2.micro"
+  key_name               = "terraformkey"
+  subnet_id              = aws_subnet.publicsubnet.id
+  vpc_security_group_ids = [ aws_security_group.testvpc_aws_security_group.id ]
+  user_data              = <<-EOF
   #!/bin/bash
 
   # Update package lists
@@ -20,5 +20,6 @@ resource "aws_instance" "testec2" {
   sudo systemctl enable apache2
 
   echo "httpd installation complete!"
-  EOF 
+  EOF
 }
+
