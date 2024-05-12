@@ -18,3 +18,35 @@ reresource "aws_iam_user" "new" {
   for_each = to_set(["test1","test2","test3"])
   name = each.key
 }
+#===============================================================================================
+# resourse with lifecycle meta argument 
+resource "aws_instance" "newtest" {
+  ami = "ami-05e00961530ae1b55"
+  key_name = "terraformkey"
+  instance_type = "t2.micro"
+ /* lifecycle {
+    # Prevent accidental destruction
+    prevent_destroy = true
+
+    # Ignore changes to the AMI ID
+   # ignore_changes = ["ami"]
+  }
+*/
+  user_data = <<-EOF
+  #!/bin/bash
+
+  # Update package lists
+  sudo apt update
+
+  # Install httpd package
+  sudo apt install -y apache2
+
+  # Start the httpd service
+  sudo systemctl start apache2
+
+  # Enable httpd to start on boot
+  sudo systemctl enable apache2
+
+  echo "httpd installation complete!"
+  EOF
+}
