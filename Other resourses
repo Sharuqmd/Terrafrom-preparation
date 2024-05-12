@@ -1,1 +1,17 @@
+#create bucket using for_each meta argument 
+variable "bucket_config" {
+  type = map(object){
+    name = "test" 
+    Environment = "Dev"
+   }
+  }
+resource "aws_s3_bucket" "example" {
+  for_each = var.bucket_config
+  bucket = ${each.key}-${each.value} # it uses keyand value in the variable called bucket_config
+
+  tags = {
+    Name        = "My bucket"
+    Environment = "Dev"
+  }
+}
 
