@@ -14,4 +14,7 @@ resource "aws_s3_bucket" "example" {
     Environment = "Dev"
   }
 }
-
+reresource "aws_iam_user" "new" {
+  for_each = to_set(["test1","test2","test3"])
+  name = each.key
+}
