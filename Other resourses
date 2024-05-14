@@ -8,7 +8,9 @@ variable "bucket_config" {
 resource "aws_s3_bucket" "example" {
   for_each = var.bucket_config
   bucket = ${each.key}-${each.value} # it uses keyand value in the variable called bucket_config
-
+  /* tags = {
+    name = "variabletest-$(count.index)"
+  } */
   tags = {
     Name        = "My bucket"
     Environment = "Dev"
