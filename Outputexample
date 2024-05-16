@@ -1,0 +1,10 @@
+
+#output example 
+output "aws_instance_publicip" {
+  description = "to get public ip"
+  value = aws_instance.testec2.public_ip
+}
+output "aws_instance_privateip" {
+    description = "to get private ip "
+    value = aws_instance.testec2.private_ip
+}
