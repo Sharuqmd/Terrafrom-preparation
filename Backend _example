@@ -1,0 +1,38 @@
+# setting backend for terraform state file 
+terraform {
+  required_version = "1.7.5"
+  required_providers {
+   aws = {
+    source  = "hashicorp/aws"
+    version = "~> 5.0"
+   }
+  }
+  backend "s3" {
+    bucket = "backbucketpro"
+    key    = "dev/terraform.tf"
+    region = "ap-south-1"
+  }
+}
+provider "aws" {
+    profile = "default"
+    region = "ap-south-1"
+  }
+resource "aws_instance" "newinstance" {
+  ami = "ami-05e00961530ae1b55"
+  key_name = "terraformkey"
+  count = 2
+  vpc_security_group_ids = [ aws_security_group.testvpc_aws_security_group1.id ]
+  instance_type = "t2.micro"
+}
+resource "aws_security_group" "testvpc_aws_security_group1" {
+  name        = "testvpc_aws_security_group1"
+  description = "Allow TLS inbound traffic and all outbound traffic"
+  #vpc_id      = aws_vpc.testvpc.id
+
+  tags = {
+    Name = "testvpc_aws_security_group1"
+  }
+
+ ingress {
+ description = "tls from vpc"
+ from_port = 22
