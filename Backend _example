@@ -11,6 +11,7 @@ terraform {
     bucket = "backbucketpro"
     key    = "dev/terraform.tf"
     region = "ap-south-1"
+    dynamodb_table = "mttabel"
   }
 }
 provider "aws" {
@@ -56,4 +57,3 @@ resource "aws_security_group" "testvpc_aws_security_group1" {
  protocol = "-1"
  }
 }
-
