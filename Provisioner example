@@ -1,0 +1,120 @@
+
+/*terraform have main blocks called terraform block , provider block , resourses block, data block
+variableblock, provisioner block 
+=========================================
+##In terraform form block the terraform version and aws plugin version is mentioned and 
+backend have s3 bucket as remote storage to store statefile and dynamodb to have statelock feature
+======================================================
+##In provider block aws required region and default profile is mentioned 
+==============================================================================
+##IN resourses block all the resourses are mentioned with its artibute example ec2 instance and 
+metaarguments like for each,count,depends on,provisioners,lifecycle
+==============================================================
+##In variable block we can assign variables in key value pair inside .tfvar file seperatly and 
+create variable along resourses block and call it by its name with var.nameofthevariable
+================================================================================
+##In data block
+*/
+
+#===========================================================================
+# This is Provisioner example
+provider "aws" {
+  region = "ap-south-1"
+}
+variable "ami" {
+  description = "this will give the ami value "
+}
+variable "instance_type" {
+    description = "this will give the value of instance type"
+}
+
+# put this in tfvars file as variable parametes
+#ami = "ami-05e00961530ae1b55"
+#instance_type = "t2.micro"
+
+resource "aws_vpc" "newvpc" {
+  cidr_block = "10.0.0.0/16"
+  tags = { 
+    name = "newvpc"
+  }
+}
+resource "aws_subnet" "newsubnetpublic" {
+  vpc_id = aws_vpc.newvpc.id
+  cidr_block = "10.0.0.0/16"
+  availability_zone = "ap-south-1a"
+  map_public_ip_on_launch = true
+}
+resource "aws_internet_gateway" "test-gateway" {
+  vpc_id = aws_vpc.newvpc.id
+  tags = {
+    name = "test-gateway"
+  }
+}
+resource "aws_route_table" "test-route" {
+  vpc_id = aws_vpc.newvpc.id
+}
+resource "aws_route" "test-route" {
+  route_table_id = aws_route_table.test-route.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id = aws_internet_gateway.test-gateway.id
+}
+resource "aws_route_table_association" "test-route" {
+  subnet_id = aws_subnet.newsubnetpublic.id
+  route_table_id = aws_route_table.test-route.id
+}
+
+#======================================================================
+#creating security group 
+resource "aws_security_group" "testvpc_aws_security_group" {
+  name        = "testvpc_aws_security_group"
+  description = "Allow TLS inbound traffic and all outbound traffic"
+  vpc_id      = aws_vpc.testvpc.id
+  tags = {
+    Name = "testvpc_aws_security_group"
+  }
+
+ ingress {
+ description = "tls from vpc"
+ from_port = 22
+ to_port = 22
+ cidr_blocks = ["0.0.0.0/0"]
+ protocol = "tcp"
+ }
+ ingress {
+ description = "tls from vpc http"
+ from_port = 80
+ to_port = 80
+ cidr_blocks = ["0.0.0.0/0"]
+ protocol = "tcp"
+ }
+
+ egress {
+ description = "tls from vpc allow all outbound"
+ from_port = 0
+ to_port = 0
+ cidr_blocks = ["0.0.0.0/0"]
+ protocol = "-1"
+ }
+}
+##=========================================================
+#creation time provisioner
+resource "aws_instance" "example" {
+  ami = var.ami
+  instance_type = var.instance_type
+  security_groups = [ aws_security_group.testvpc_aws_security_group.id ]
+
+provisioner "file" {
+ source = "/home/ubuntu/provisioner/hello.txt"
+ destination = "/hello.txt"
+}
+provisioner "file" {
+  content = "ami used: ${self.ami}"
+  destination = "/file.log"
+}
+connection {
+  type        = "ssh"
+   host        = self.public_ip
+   user        = "ec2-user"
+   private_key = file("/home/ubuntu/provisioner/terrafromkey.pem")
+}
+}
