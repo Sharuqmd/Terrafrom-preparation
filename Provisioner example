@@ -1,5 +1,4 @@
-
-/*terraform have main blocks called terraform block , provider block , resourses block, data block
+*terraform have main blocks called terraform block , provider block , resourses block, data block
 variableblock, provisioner block 
 =========================================
 ##In terraform form block the terraform version and aws plugin version is mentioned and 
@@ -65,12 +64,12 @@ resource "aws_route_table_association" "test-route" {
 
 #======================================================================
 #creating security group 
-resource "aws_security_group" "testvpc_aws_security_group" {
-  name        = "testvpc_aws_security_group"
+resource "aws_security_group" "testvpc_aws_security1" {
+  name        = "testvpc_aws_security1"
   description = "Allow TLS inbound traffic and all outbound traffic"
-  vpc_id      = aws_vpc.testvpc.id
+  vpc_id      = aws_vpc.newvpc.id
   tags = {
-    Name = "testvpc_aws_security_group"
+    Name = "testvpc_aws_security1"
   }
 
  ingress {
@@ -101,7 +100,9 @@ resource "aws_security_group" "testvpc_aws_security_group" {
 resource "aws_instance" "example" {
   ami = var.ami
   instance_type = var.instance_type
-  security_groups = [ aws_security_group.testvpc_aws_security_group.id ]
+  security_groups = [ aws_security_group.testvpc_aws_security1.id ]
+  subnet_id = aws_subnet.newsubnetpublic.id
+  key_name = "terraformkey"
 
 provisioner "file" {
  source = "/home/ubuntu/provisioner/hello.txt"
@@ -114,7 +115,7 @@ provisioner "file" {
 connection {
   type        = "ssh"
    host        = self.public_ip
-   user        = "ec2-user"
+   user        = "ubuntu"
    private_key = file("/home/ubuntu/provisioner/terrafromkey.pem")
 }
 }
